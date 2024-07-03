@@ -30,3 +30,9 @@
 
 # Debug files
 *.dSYM/
+
+# build files
+build/
+
+# virtual python environment
+.venv/
