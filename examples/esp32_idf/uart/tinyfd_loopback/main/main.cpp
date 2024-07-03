@@ -74,8 +74,8 @@ void tx_task(void *arg)
 {
     for ( ;; )
     {
-        proto.run_tx(
-            [](void *p, const void *b, int s) -> int { return tiny_serial_send_timeout(s_serial, b, s, 100); });
+        proto.run_tx([](void *p, const void *b, int s) -> int
+                     { return tiny_serial_send_timeout(s_serial, b, s, 100); });
     }
     vTaskDelete(NULL);
 }
@@ -83,7 +83,7 @@ void tx_task(void *arg)
 
 void main_task(void *args)
 {
-    s_serial = tiny_serial_open("uart1,4,5,-1,-1", 115200);
+    s_serial = tiny_serial_open("uart1,37,36,-1,-1", 115200);
 
     /* Lets use 16-bit checksum as ESP32 allows that */
     proto.enableCrc16();
