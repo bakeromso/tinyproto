@@ -55,7 +55,8 @@ extern "C"
 /**
  * Macro calculating buffer size required for specific packet size in bytes, and window
  */
-#define HDLC_BUF_SIZE_EX(mtu, crc, window) (sizeof(hdlc_ll_data_t) + ((int)(crc) / 8 + (mtu)) * (window) + TINY_ALIGN_STRUCT_VALUE - 1)
+#define HDLC_BUF_SIZE_EX(mtu, crc, window)                                                                             \
+    (sizeof(hdlc_ll_data_t) + ((int)(crc) / 8 + (mtu)) * (window) + TINY_ALIGN_STRUCT_VALUE - 1)
 
     /**
      * Structure describes configuration of lowest HDLC level
@@ -82,7 +83,7 @@ extern "C"
          * @param data pointer to sent data
          * @param len size of sent data in bytes
          */
-        on_tx_frame_cb_t on_frame_send;
+        on_tx_frame_cb_t on_frame_sent;
 
         /**
          * Buffer to be used by hdlc level to receive data to

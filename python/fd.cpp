@@ -30,7 +30,7 @@
 
 #include <Python.h>
 #include "structmember.h"
-//#include "proto/hdlc/low_level/hdlc.h"
+// #include "proto/hdlc/low_level/hdlc.h"
 #include "proto/fd/tiny_fd.h"
 #include "fd.h"
 
@@ -42,7 +42,7 @@ typedef struct
     int mtu;
     int window_size;
     void *buffer;
-    PyObject *on_frame_send;
+    PyObject *on_frame_sent;
     PyObject *on_frame_read;
     PyObject *on_connect_event;
     PyObject *read_func;
@@ -59,7 +59,7 @@ static PyMemberDef Fd_members[] = {
 static void Fd_dealloc(Fd *self)
 {
     Py_XDECREF(self->on_frame_read);
-    Py_XDECREF(self->on_frame_send);
+    Py_XDECREF(self->on_frame_sent);
     Py_XDECREF(self->on_connect_event);
     Py_XDECREF(self->read_func);
     Py_XDECREF(self->write_func);
@@ -71,7 +71,7 @@ static int Fd_init(Fd *self, PyObject *args, PyObject *kwds)
     self->handle = NULL;
     self->buffer = NULL;
     self->crc_type = HDLC_CRC_16;
-    self->on_frame_send = NULL;
+    self->on_frame_sent = NULL;
     self->on_frame_read = NULL;
     self->on_connect_event = NULL;
     self->read_func = NULL;
@@ -113,16 +113,16 @@ static void on_frame_read(void *user_data, uint8_t addr, uint8_t *data, int len)
     }
 }
 
-static void on_frame_send(void *user_data, uint8_t addr, const uint8_t *data, int len)
+static void on_frame_sent(void *user_data, uint8_t addr, const uint8_t *data, int len)
 {
     Fd *self = (Fd *)user_data;
-    if ( self->on_frame_send )
+    if ( self->on_frame_sent )
     {
         PyGILState_STATE gstate;
         gstate = PyGILState_Ensure();
 
         PyObject *arg = PyByteArray_FromStringAndSize((const char *)data, (Py_ssize_t)len);
-        PyObject *temp = PyObject_CallFunctionObjArgs(self->on_frame_send, arg, NULL);
+        PyObject *temp = PyObject_CallFunctionObjArgs(self->on_frame_sent, arg, NULL);
         Py_XDECREF(temp); // Dereference result
         Py_DECREF(arg);   // We do not need ByteArray anymore
 
@@ -158,7 +158,7 @@ static PyObject *Fd_begin(Fd *self)
     tiny_fd_init_t init{};
     init.pdata = self;
     init.on_read_cb = on_frame_read;
-    init.on_send_cb = on_frame_send;
+    init.on_send_cb = on_frame_sent;
     init.on_connect_event_cb = on_connect_event;
     init.crc_type = self->crc_type;
     init.buffer_size = tiny_fd_buffer_size_by_mtu_ex(1, self->mtu, self->window_size, init.crc_type, 2);
@@ -398,15 +398,15 @@ static int Fd_set_on_read(Fd *self, PyObject *value, void *closure)
 
 static PyObject *Fd_get_on_send(Fd *self, void *closure)
 {
-    Py_INCREF(self->on_frame_send);
-    return self->on_frame_send;
+    Py_INCREF(self->on_frame_sent);
+    return self->on_frame_sent;
 }
 
 static int Fd_set_on_send(Fd *self, PyObject *value, void *closure)
 {
-    PyObject *tmp = self->on_frame_send;
+    PyObject *tmp = self->on_frame_sent;
     Py_INCREF(value);
-    self->on_frame_send = value;
+    self->on_frame_sent = value;
     Py_XDECREF(tmp);
     return 0;
 }
@@ -428,7 +428,7 @@ static int Fd_set_on_connect_event(Fd *self, PyObject *value, void *closure)
 
 static PyObject *Fd_get_crc(Fd *self, void *closure)
 {
-    return PyLong_FromLong( self->crc_type );
+    return PyLong_FromLong(self->crc_type);
 }
 
 static int Fd_set_crc(Fd *self, PyObject *value)
@@ -437,19 +437,18 @@ static int Fd_set_crc(Fd *self, PyObject *value)
     if ( value && PyLong_Check(value) )
     {
         int temp = PyLong_AsLong(value);
-        if ( temp == HDLC_CRC_16 || temp == HDLC_CRC_32 ||
-             temp == HDLC_CRC_8 || temp == HDLC_CRC_OFF ||
+        if ( temp == HDLC_CRC_16 || temp == HDLC_CRC_32 || temp == HDLC_CRC_8 || temp == HDLC_CRC_OFF ||
              temp == HDLC_CRC_DEFAULT )
         {
-             result = 0;
-             self->crc_type = (hdlc_crc_t)temp;
+            result = 0;
+            self->crc_type = (hdlc_crc_t)temp;
         }
     }
     if ( result < 0 )
     {
         PyErr_Format(PyExc_RuntimeError, "Allowable CRC values are: 0 (AUTO), 8, 16, 32, 255 (OFF)");
     }
-    return result/* 0 on success, -1 on failure with error set. */;
+    return result /* 0 on success, -1 on failure with error set. */;
 }
 
 static PyGetSetDef Fd_getsetters[] = {

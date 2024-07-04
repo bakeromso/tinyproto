@@ -45,10 +45,10 @@ static PyObject *pants(PyObject *self, PyObject *args)
 static PyMethodDef tinyproto_methods[] = {{"pants", pants, METH_VARARGS, "Returns a square of an integer."},
                                           {NULL, NULL, 0, NULL}};
 
-static struct PyModuleDef tinyproto_definition = {PyModuleDef_HEAD_INIT, "tinyproto_", "A Python tiny protocol module",
+static struct PyModuleDef tinyproto_definition = {PyModuleDef_HEAD_INIT, "tinyproto", "A Python tiny protocol module",
                                                   -1, tinyproto_methods};
 
-PyMODINIT_FUNC PyInit_tinyproto_(void)
+PyMODINIT_FUNC PyInit_tinyproto(void)
 {
     Py_Initialize();
     PyObject *m = PyModule_Create(&tinyproto_definition);

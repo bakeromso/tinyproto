@@ -32,7 +32,7 @@ IFdLinkLayer::~IFdLinkLayer()
 {
 }
 
-bool IFdLinkLayer::begin(on_frame_read_cb_t onReadCb, on_frame_send_cb_t onSendCb, void *udata)
+bool IFdLinkLayer::begin(on_frame_read_cb_t onReadCb, on_frame_sent_cb_t onSendCb, void *udata)
 {
     tiny_fd_init_t init{};
     init.pdata = udata;
@@ -70,7 +70,7 @@ void IFdLinkLayer::flushTx()
 int IFdLinkLayer::parseData(const uint8_t *data, int size)
 {
     int code = tiny_fd_on_rx_data(m_handle, data, size);
-    return code ==  TINY_SUCCESS ? size : code;
+    return code == TINY_SUCCESS ? size : code;
 }
 
 int IFdLinkLayer::getData(uint8_t *data, int size)

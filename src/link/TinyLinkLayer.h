@@ -34,7 +34,9 @@ namespace tinyproto
 class ILinkLayer
 {
 public:
-     ILinkLayer() {}
+    ILinkLayer()
+    {
+    }
 
     /**
      * The method initializes the link layer protocol, and connects custom callbacks
@@ -46,7 +48,7 @@ public:
      * @param udata user defined data, will be passed to callbacks
      * @return true if successful, false is initialization error happened.
      */
-    virtual bool begin(on_frame_read_cb_t onReadCb, on_frame_send_cb_t onSendCb, void *udata) = 0;
+    virtual bool begin(on_frame_read_cb_t onReadCb, on_frame_sent_cb_t onSendCb, void *udata) = 0;
 
     /**
      * Stops link layer protocol
@@ -54,14 +56,14 @@ public:
     virtual void end() = 0;
 
     /**
-     * Runs rx part of the protocol. This method is automatically called by the owner of the protocol (i.e. tinyproto::Proto)
-     * The actual implementation on runRx() method depends on hardware channel used.
+     * Runs rx part of the protocol. This method is automatically called by the owner of the protocol (i.e.
+     * tinyproto::Proto) The actual implementation on runRx() method depends on hardware channel used.
      */
     virtual void runRx() = 0;
 
     /**
-     * Runs tx part of the protocol. This method is automatically called by the owner of the protocol (i.e. tinyproto::Proto)
-     * The actual implementation on runTx() method depends on hardware channel used.
+     * Runs tx part of the protocol. This method is automatically called by the owner of the protocol (i.e.
+     * tinyproto::Proto) The actual implementation on runTx() method depends on hardware channel used.
      */
     virtual void runTx() = 0;
 

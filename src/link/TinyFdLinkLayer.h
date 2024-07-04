@@ -35,7 +35,7 @@ public:
 
     ~IFdLinkLayer();
 
-    bool begin(on_frame_read_cb_t onReadCb, on_frame_send_cb_t onSendCb, void *udata) override;
+    bool begin(on_frame_read_cb_t onReadCb, on_frame_sent_cb_t onSendCb, void *udata) override;
 
     void end() override;
 
@@ -53,7 +53,10 @@ public:
         return m_crc;
     }
 
-    void setCrc( hdlc_crc_t crc ) { m_crc = crc; }
+    void setCrc(hdlc_crc_t crc)
+    {
+        m_crc = crc;
+    }
 
     void setWindow(int window)
     {
@@ -67,7 +70,6 @@ public:
     }
 
 protected:
-
     int parseData(const uint8_t *data, int size);
 
     int getData(uint8_t *data, int size);

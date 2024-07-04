@@ -40,7 +40,7 @@ typedef struct
     hdlc_crc_t crc_type;
     int mtu;
     void *buffer;
-    PyObject *on_frame_send;
+    PyObject *on_frame_sent;
     PyObject *on_frame_read;
 } Hdlc;
 
@@ -70,7 +70,7 @@ static int Hdlc_init(Hdlc *self, PyObject *args, PyObject *kwds)
     self->buffer = NULL;
     self->crc_type = HDLC_CRC_16;
     self->user_buffer.buf = NULL;
-    self->on_frame_send = NULL;
+    self->on_frame_sent = NULL;
     self->on_frame_read = NULL;
     self->mtu = 1500;
     return 0;
@@ -102,10 +102,10 @@ static void on_frame_read(void *user_data, uint8_t *data, int len)
     }
 }
 
-static void on_frame_send(void *user_data, const uint8_t *data, int len)
+static void on_frame_sent(void *user_data, const uint8_t *data, int len)
 {
     Hdlc *self = (Hdlc *)user_data;
-    if ( self->on_frame_send )
+    if ( self->on_frame_sent )
     {
         PyObject *arg = PyByteArray_FromStringAndSize((const char *)data, (Py_ssize_t)len);
         // We can free Py_buffer user_buffer only after we constructed new PyObject with the data
@@ -114,7 +114,7 @@ static void on_frame_send(void *user_data, const uint8_t *data, int len)
             PyBuffer_Release(&self->user_buffer);
             self->user_buffer.buf = NULL;
         }
-        PyObject *temp = PyObject_CallFunctionObjArgs(self->on_frame_send, arg, NULL);
+        PyObject *temp = PyObject_CallFunctionObjArgs(self->on_frame_sent, arg, NULL);
         Py_XDECREF(temp); // Dereference result
         Py_DECREF(arg);   // We do not need ByteArray anymore
     }
@@ -136,7 +136,7 @@ static PyObject *Hdlc_begin(Hdlc *self)
     init.user_data = self;
     init.crc_type = self->crc_type;
     init.on_frame_read = on_frame_read;
-    init.on_frame_send = on_frame_send;
+    init.on_frame_sent = on_frame_sent;
     init.buf_size = hdlc_ll_get_buf_size_ex(self->mtu, self->crc_type, 1);
     self->buffer = PyObject_Malloc(init.buf_size);
     init.buf = self->buffer;
@@ -235,22 +235,22 @@ static int Hdlc_set_on_read(Hdlc *self, PyObject *value, void *closure)
 
 static PyObject *Hdlc_get_on_send(Hdlc *self, void *closure)
 {
-    Py_INCREF(self->on_frame_send);
-    return self->on_frame_send;
+    Py_INCREF(self->on_frame_sent);
+    return self->on_frame_sent;
 }
 
 static int Hdlc_set_on_send(Hdlc *self, PyObject *value, void *closure)
 {
-    PyObject *tmp = self->on_frame_send;
+    PyObject *tmp = self->on_frame_sent;
     Py_INCREF(value);
-    self->on_frame_send = value;
+    self->on_frame_sent = value;
     Py_XDECREF(tmp);
     return 0;
 }
 
-static PyObject* Hdlc_get_crc(Hdlc *self, void * closure)
+static PyObject *Hdlc_get_crc(Hdlc *self, void *closure)
 {
-    return PyLong_FromLong( self->crc_type );
+    return PyLong_FromLong(self->crc_type);
 }
 
 static int Hdlc_set_crc(Hdlc *self, PyObject *value)
@@ -259,25 +259,24 @@ static int Hdlc_set_crc(Hdlc *self, PyObject *value)
     if ( value && PyLong_Check(value) )
     {
         int temp = PyLong_AsLong(value);
-        if ( temp == HDLC_CRC_16 || temp == HDLC_CRC_32 ||
-             temp == HDLC_CRC_8 || temp == HDLC_CRC_OFF ||
+        if ( temp == HDLC_CRC_16 || temp == HDLC_CRC_32 || temp == HDLC_CRC_8 || temp == HDLC_CRC_OFF ||
              temp == HDLC_CRC_DEFAULT )
         {
-             result = 0;
-             self->crc_type = (hdlc_crc_t)temp;
+            result = 0;
+            self->crc_type = (hdlc_crc_t)temp;
         }
     }
     if ( result < 0 )
     {
         PyErr_Format(PyExc_RuntimeError, "Allowable CRC values are: 0 (AUTO), 8, 16, 32, 255 (OFF)");
     }
-    return result/* 0 on success, -1 on failure with error set. */;
+    return result /* 0 on success, -1 on failure with error set. */;
 }
 
 static PyGetSetDef Hdlc_getsetters[] = {
     {"on_read", (getter)Hdlc_get_on_read, (setter)Hdlc_set_on_read, "Callback for incoming messages", NULL},
     {"on_send", (getter)Hdlc_get_on_send, (setter)Hdlc_set_on_send, "Callback for successfully sent messages", NULL},
-    {"crc",     (getter)Hdlc_get_crc,     (setter)Hdlc_set_crc,     "CRC value", NULL},
+    {"crc", (getter)Hdlc_get_crc, (setter)Hdlc_set_crc, "CRC value", NULL},
     {NULL} /* Sentinel */
 };
 

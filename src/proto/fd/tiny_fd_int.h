@@ -43,23 +43,23 @@ extern "C"
 #include "hal/tiny_types.h"
 #include "tiny_fd_frames_int.h"
 
-#define FD_PEER_BUF_SIZE() ( sizeof(tiny_fd_peer_info_t) )
+#define FD_PEER_BUF_SIZE() (sizeof(tiny_fd_peer_info_t))
 
 #define FD_MIN_BUF_SIZE(mtu, window)                                                                                   \
-    (sizeof(tiny_fd_data_t) + TINY_ALIGN_STRUCT_VALUE - 1 + \
-     HDLC_MIN_BUF_SIZE(mtu + sizeof(tiny_frame_header_t), HDLC_CRC_16) +                     \
-      ( 1 * FD_PEER_BUF_SIZE() ) + \
-      (sizeof(tiny_fd_frame_info_t *) + sizeof(tiny_fd_frame_info_t) + mtu \
-                                      - sizeof(((tiny_fd_frame_info_t *)0)->payload) ) * window + \
-          ( sizeof(tiny_fd_frame_info_t) + sizeof(tiny_fd_frame_info_t *) ) * TINY_FD_U_QUEUE_MAX_SIZE )
+    (sizeof(tiny_fd_data_t) + TINY_ALIGN_STRUCT_VALUE - 1 +                                                            \
+     HDLC_MIN_BUF_SIZE(mtu + sizeof(tiny_frame_header_t), HDLC_CRC_16) + (1 * FD_PEER_BUF_SIZE()) +                    \
+     (sizeof(tiny_fd_frame_info_t *) + sizeof(tiny_fd_frame_info_t) + mtu -                                            \
+      sizeof(((tiny_fd_frame_info_t *)0)->payload)) *                                                                  \
+         window +                                                                                                      \
+     (sizeof(tiny_fd_frame_info_t) + sizeof(tiny_fd_frame_info_t *)) * TINY_FD_U_QUEUE_MAX_SIZE)
 
-#define FD_BUF_SIZE_EX(mtu, tx_window, crc, rx_window)                                                                      \
-    (sizeof(tiny_fd_data_t) + TINY_ALIGN_STRUCT_VALUE - 1 + \
-     HDLC_BUF_SIZE_EX(mtu + sizeof(tiny_frame_header_t), crc, rx_window) +           \
-      ( 1 * FD_PEER_BUF_SIZE() ) + \
-      (sizeof(tiny_fd_frame_info_t *) + sizeof(tiny_i_frame_info_t) + mtu \
-                                      - sizeof(((tiny_fd_frame_info_t *)0)->payload)) * tx_window + \
-       ( sizeof(tiny_fd_frame_info_t) + sizeof(tiny_fd_frame_info_t *) ) * TINY_FD_U_QUEUE_MAX_SIZE)
+#define FD_BUF_SIZE_EX(mtu, tx_window, crc, rx_window)                                                                 \
+    (sizeof(tiny_fd_data_t) + TINY_ALIGN_STRUCT_VALUE - 1 +                                                            \
+     HDLC_BUF_SIZE_EX(mtu + sizeof(tiny_frame_header_t), crc, rx_window) + (1 * FD_PEER_BUF_SIZE()) +                  \
+     (sizeof(tiny_fd_frame_info_t *) + sizeof(tiny_i_frame_info_t) + mtu -                                             \
+      sizeof(((tiny_fd_frame_info_t *)0)->payload)) *                                                                  \
+         tx_window +                                                                                                   \
+     (sizeof(tiny_fd_frame_info_t) + sizeof(tiny_fd_frame_info_t *)) * TINY_FD_U_QUEUE_MAX_SIZE)
 
     typedef enum
     {
@@ -80,7 +80,7 @@ extern "C"
     {
         /// state of hdlc protocol according to ISO & RFC
         tiny_fd_state_t state;
-        uint8_t addr;        // Peer address
+        uint8_t addr; // Peer address
 
         uint8_t next_nr;     // frame waiting to receive
         uint8_t sent_nr;     // frame index last sent back
@@ -92,7 +92,7 @@ extern "C"
         uint32_t last_i_ts;  // last sent I-frame timestamp
         uint32_t last_ka_ts; // last keep alive timestamp
         uint8_t ka_confirmed;
-        uint8_t retries;     // Number of retries to perform before timeout takes place
+        uint8_t retries; // Number of retries to perform before timeout takes place
 
         tiny_events_t events;
 
@@ -114,7 +114,7 @@ extern "C"
         /// Callback to process received frames
         on_frame_read_cb_t on_read_cb;
         /// Callback to process received frames
-        on_frame_send_cb_t on_send_cb;
+        on_frame_sent_cb_t on_send_cb;
         /// Callback to get connect/disconnect notification
         on_connect_event_cb_t on_connect_event_cb;
         /// hdlc information

@@ -61,7 +61,7 @@
  ***************************************************************/
 
 static void on_frame_read(void *user_data, uint8_t *data, int len);
-static void on_frame_send(void *user_data, const uint8_t *data, int len);
+static void on_frame_sent(void *user_data, const uint8_t *data, int len);
 
 int tiny_light_init(STinyLightData *handle, write_block_cb_t write_func, read_block_cb_t read_func, void *pdata)
 {
@@ -69,10 +69,10 @@ int tiny_light_init(STinyLightData *handle, write_block_cb_t write_func, read_bl
     {
         return TINY_ERR_FAILED;
     }
-    hdlc_ll_init_t init = { 0 };
+    hdlc_ll_init_t init = {0};
     init.user_data = handle;
     init.on_frame_read = on_frame_read;
-    init.on_frame_send = on_frame_send;
+    init.on_frame_sent = on_frame_sent;
     init.buf = &handle->buffer[0];
     init.buf_size = LIGHT_BUF_SIZE;
     init.crc_type = ((STinyLightData *)handle)->crc_type;
@@ -104,7 +104,7 @@ int tiny_light_close(STinyLightData *handle)
 
 /////////////////////////////////////////////////////////////////////////////////////////
 
-static void on_frame_send(void *user_data, const uint8_t *data, int len)
+static void on_frame_sent(void *user_data, const uint8_t *data, int len)
 {
 }
 

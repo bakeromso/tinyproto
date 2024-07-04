@@ -29,7 +29,8 @@
 namespace tinyproto
 {
 
-template <int MTU, int TX_WINDOW, int BUFFER_SIZE, int BLOCK> class StaticSerialFdLink: public ISerialLinkLayer<IFdLinkLayer, BLOCK>
+template <int MTU, int TX_WINDOW, int BUFFER_SIZE, int BLOCK>
+class StaticSerialFdLink: public ISerialLinkLayer<IFdLinkLayer, BLOCK>
 {
 public:
     explicit StaticSerialFdLink(char *dev)
@@ -43,11 +44,12 @@ private:
     uint8_t m_buffer[BUFFER_SIZE] = {};
 };
 
-
 #if defined(ARDUINO)
 
 /** Valid only for Arduino IDE, since it has access to internal headers */
-template <int MTU, int TX_WINDOW, int RX_WINDOW, int BLOCK> using ArduinoStaticSerialFdLinkLayer = StaticSerialFdLink<MTU, TX_WINDOW, FD_BUF_SIZE_EX(MTU, TX_WINDOW, HDLC_CRC_16, RX_WINDOW), BLOCK>;
+template <int MTU, int TX_WINDOW, int RX_WINDOW, int BLOCK>
+using ArduinoStaticSerialFdLinkLayer =
+    StaticSerialFdLink<MTU, TX_WINDOW, FD_BUF_SIZE_EX(MTU, TX_WINDOW, HDLC_CRC_16, RX_WINDOW), BLOCK>;
 
 class ArduinoSerialFdLink: public ArduinoStaticSerialFdLinkLayer<32, 2, 2, 4>
 {
@@ -70,7 +72,7 @@ public:
 
     ~SerialFdLink();
 
-    bool begin(on_frame_read_cb_t onReadCb, on_frame_send_cb_t onSendCb, void *udata) override;
+    bool begin(on_frame_read_cb_t onReadCb, on_frame_sent_cb_t onSendCb, void *udata) override;
 
     void end() override;
 

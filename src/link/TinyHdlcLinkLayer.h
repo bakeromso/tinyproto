@@ -36,7 +36,7 @@ public:
 
     ~IHdlcLinkLayer();
 
-    bool begin(on_frame_read_cb_t onReadCb, on_frame_send_cb_t onSendCb, void *udata) override;
+    bool begin(on_frame_read_cb_t onReadCb, on_frame_sent_cb_t onSendCb, void *udata) override;
 
     void end() override;
 
@@ -49,7 +49,7 @@ public:
         return m_crc;
     }
 
-    void setCrc( hdlc_crc_t crc )
+    void setCrc(hdlc_crc_t crc)
     {
         m_crc = crc;
     }
@@ -61,7 +61,6 @@ public:
     }
 
 protected:
-
     int parseData(const uint8_t *data, int size);
 
     int getData(uint8_t *data, int size);
@@ -70,8 +69,8 @@ private:
     hdlc_ll_handle_t m_handle = nullptr;
     void *m_udata = nullptr;
     on_frame_read_cb_t m_onReadCb = nullptr;
-    on_frame_send_cb_t m_onSendCb = nullptr;
-    tiny_mutex_t  m_sendMutex{};
+    on_frame_sent_cb_t m_onSendCb = nullptr;
+    tiny_mutex_t m_sendMutex{};
     tiny_events_t m_events{};
     void *m_tempBuffer = nullptr;
 

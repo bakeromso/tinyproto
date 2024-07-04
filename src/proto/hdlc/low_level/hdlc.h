@@ -93,7 +93,7 @@ extern "C"
          * @param data pointer to sent data
          * @param len size of sent data in bytes
          */
-        on_tx_frame_cb_t on_frame_send;
+        on_tx_frame_cb_t on_frame_sent;
 
         /**
          * Buffer to be used by hdlc level to receive data to.

@@ -29,7 +29,8 @@
 namespace tinyproto
 {
 
-template <int MTU, int BUFFER_SIZE, int BLOCK> class StaticSerialHdlcLink: public ISerialLinkLayer<IHdlcLinkLayer, BLOCK>
+template <int MTU, int BUFFER_SIZE, int BLOCK>
+class StaticSerialHdlcLink: public ISerialLinkLayer<IHdlcLinkLayer, BLOCK>
 {
 public:
     explicit StaticSerialHdlcLink(char *dev)
@@ -42,11 +43,12 @@ private:
     uint8_t m_buffer[BUFFER_SIZE] = {};
 };
 
-
 #if defined(ARDUINO)
 
 /** Valid only for Arduino IDE, since it has access to internal headers */
-template <int MTU, int RX_WINDOW, int BLOCK> using ArduinoStaticSerialHdlcLinkLayer = StaticSerialHdlcLink<MTU, HDLC_BUF_SIZE_EX(MTU, HDLC_CRC_16, RX_WINDOW), BLOCK>;
+template <int MTU, int RX_WINDOW, int BLOCK>
+using ArduinoStaticSerialHdlcLinkLayer =
+    StaticSerialHdlcLink<MTU, HDLC_BUF_SIZE_EX(MTU, HDLC_CRC_16, RX_WINDOW), BLOCK>;
 
 class ArduinoSerialHdlcLink: public ArduinoStaticSerialHdlcLinkLayer<32, 2, 4>
 {
@@ -69,7 +71,7 @@ public:
 
     ~SerialHdlcLink();
 
-    bool begin(on_frame_read_cb_t onReadCb, on_frame_send_cb_t onSendCb, void *udata) override;
+    bool begin(on_frame_read_cb_t onReadCb, on_frame_sent_cb_t onSendCb, void *udata) override;
 
     void end() override;
 

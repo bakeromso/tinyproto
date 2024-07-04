@@ -40,10 +40,10 @@ public:
     {
     }
 
-    bool begin(on_frame_read_cb_t onReadCb, on_frame_send_cb_t onSendCb, void *udata) override
+    bool begin(on_frame_read_cb_t onReadCb, on_frame_sent_cb_t onSendCb, void *udata) override
     {
         bool result = BASE::begin(onReadCb, onSendCb, udata);
-        m_serial.setTimeout( this->getTimeout() );
+        m_serial.setTimeout(this->getTimeout());
         return result && m_serial.begin(m_speed);
     }
 
@@ -61,7 +61,7 @@ public:
         int len = m_serial.readBytes(p, BSIZE);
         while ( len > 0 )
         {
-            int temp = BASE::parseData( p, len);
+            int temp = BASE::parseData(p, len);
             if ( temp < 0 )
             {
                 break;
@@ -74,7 +74,7 @@ public:
     void runTx() override
     {
         uint8_t buf[BSIZE];
-        int len = BASE::getData( buf, BSIZE );
+        int len = BASE::getData(buf, BSIZE);
         uint8_t *ptr = buf;
         while ( len > 0 )
         {
@@ -88,7 +88,7 @@ public:
         }
     }
 
-    void setSpeed( uint32_t speed )
+    void setSpeed(uint32_t speed)
     {
         m_speed = speed;
     }

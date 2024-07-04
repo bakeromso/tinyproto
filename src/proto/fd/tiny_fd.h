@@ -46,15 +46,15 @@ extern "C"
 #include "proto/crc/tiny_crc.h"
 #include "hal/tiny_types.h"
 
-    /**
-     * @defgroup FULL_DUPLEX_API Tiny Full Duplex API functions
-     * @{
-     */
+/**
+ * @defgroup FULL_DUPLEX_API Tiny Full Duplex API functions
+ * @{
+ */
 
-    /**
-     * Address of primary stations to use with the protocol. See RFC.
-     */
-    #define TINY_FD_PRIMARY_ADDR (0)
+/**
+ * Address of primary stations to use with the protocol. See RFC.
+ */
+#define TINY_FD_PRIMARY_ADDR (0)
 
     enum
     {
@@ -98,7 +98,7 @@ extern "C"
         on_frame_read_cb_t on_read_cb;
 
         /// Callback to get notification of sent frames. Callback is called from tiny_fd_run_tx() context.
-        on_frame_send_cb_t on_send_cb;
+        on_frame_sent_cb_t on_send_cb;
 
         /**
          * buffer to store data during full-duplex protocol operating.
@@ -309,7 +309,8 @@ extern "C"
      *         * TINY_ERR_UNKNOWN_PEER if peer is not known to the system.
      *         * TINY_ERR_DATA_TOO_LARGE if user data are too big to fit in tx buffer.
      */
-    extern int tiny_fd_send_packet_to(tiny_fd_handle_t handle, uint8_t address, const void *buf, int len, uint32_t timeout);
+    extern int tiny_fd_send_packet_to(tiny_fd_handle_t handle, uint8_t address, const void *buf, int len,
+                                      uint32_t timeout);
 
     /**
      * Returns minimum required buffer size for specified parameters.
@@ -330,7 +331,8 @@ extern "C"
      * @param crc_type crc type to be used with FD protocol
      * @param rx_window number of RX ring buffer in frames
      */
-    extern int tiny_fd_buffer_size_by_mtu_ex(uint8_t peers_count, int mtu, int tx_window, hdlc_crc_t crc_type, int rx_window);
+    extern int tiny_fd_buffer_size_by_mtu_ex(uint8_t peers_count, int mtu, int tx_window, hdlc_crc_t crc_type,
+                                             int rx_window);
 
     /**
      * @brief returns max packet size in bytes.

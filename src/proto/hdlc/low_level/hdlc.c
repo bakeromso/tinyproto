@@ -72,8 +72,8 @@ int hdlc_ll_init(hdlc_ll_handle_t *handle, hdlc_ll_init_t *init)
 {
     *handle = NULL;
     // Aligning provided buffer for the system
-    uint8_t *buf = (uint8_t *)( ((uintptr_t)init->buf + TINY_ALIGN_STRUCT_VALUE - 1) & (~(TINY_ALIGN_STRUCT_VALUE - 1)) );
-    int buf_size = (int)(init->buf_size -  (buf - (uint8_t *)init->buf));
+    uint8_t *buf = (uint8_t *)(((uintptr_t)init->buf + TINY_ALIGN_STRUCT_VALUE - 1) & (~(TINY_ALIGN_STRUCT_VALUE - 1)));
+    int buf_size = (int)(init->buf_size - (buf - (uint8_t *)init->buf));
     if ( !init->buf || buf_size < (int)sizeof(hdlc_ll_data_t) )
     {
         LOG(TINY_LOG_ERR, "[HDLC] failed to init hdlc. buf=%p, size=%i (%i required)\n", init->buf, init->buf_size,
@@ -85,9 +85,9 @@ int hdlc_ll_init(hdlc_ll_handle_t *handle, hdlc_ll_init_t *init)
     (*handle)->rx_buf_size = buf_size - sizeof(hdlc_ll_data_t);
     (*handle)->crc_type = init->crc_type == HDLC_CRC_OFF ? 0 : init->crc_type;
     (*handle)->on_frame_read = init->on_frame_read;
-    (*handle)->on_frame_send = init->on_frame_send;
+    (*handle)->on_frame_sent = init->on_frame_sent;
     (*handle)->user_data = init->user_data;
-    (*handle)->phys_mtu = init->mtu ? (init->mtu + get_crc_field_size((*handle)->crc_type)): ((*handle)->rx_buf_size);
+    (*handle)->phys_mtu = init->mtu ? (init->mtu + get_crc_field_size((*handle)->crc_type)) : ((*handle)->rx_buf_size);
     (*handle)->rx.frame_buf = (*handle)->rx_buf;
 
     // Must be last
@@ -101,9 +101,9 @@ int hdlc_ll_close(hdlc_ll_handle_t handle)
 {
     if ( handle && handle->tx.data )
     {
-        if ( handle->on_frame_send )
+        if ( handle->on_frame_sent )
         {
-            handle->on_frame_send(handle->user_data, handle->tx.origin_data,
+            handle->on_frame_sent(handle->user_data, handle->tx.origin_data,
                                   (int)(handle->tx.data - handle->tx.origin_data) + handle->tx.len);
         }
     }
@@ -273,9 +273,9 @@ static int hdlc_ll_send_end(hdlc_ll_handle_t handle)
         const void *ptr = handle->tx.origin_data;
         handle->tx.origin_data = NULL;
         handle->tx.data = NULL;
-        if ( handle->on_frame_send )
+        if ( handle->on_frame_sent )
         {
-            handle->on_frame_send(handle->user_data, ptr, len);
+            handle->on_frame_sent(handle->user_data, ptr, len);
         }
     }
     return result;
@@ -424,8 +424,8 @@ static int hdlc_ll_read_data(hdlc_ll_handle_t handle, const uint8_t *data, int l
         }
         else
         {
-            LOG(TINY_LOG_WRN, "[HDLC:%p] No space for incoming byte: len=%i (mtu = %i)\n",
-                              handle, (int)(handle->rx.data - handle->rx.frame_buf), handle->phys_mtu);
+            LOG(TINY_LOG_WRN, "[HDLC:%p] No space for incoming byte: len=%i (mtu = %i)\n", handle,
+                (int)(handle->rx.data - handle->rx.frame_buf), handle->phys_mtu);
         }
         result++;
         data++;
@@ -497,7 +497,7 @@ static int hdlc_ll_read_end(hdlc_ll_handle_t handle, const uint8_t *data, int le
         if ( TINY_LOG_DEB < g_tiny_log_level )
             for ( int i = 0; i < len; i++ )
                 fprintf(stderr, " %02X ", (handle->rx.frame_buf)[i]);
-        LOG(TINY_LOG_DEB, "\n%s\n","------------");
+        LOG(TINY_LOG_DEB, "\n%s\n", "------------");
 #endif
         return TINY_ERR_WRONG_CRC;
     }
